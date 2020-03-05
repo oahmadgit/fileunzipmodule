@@ -23,7 +23,8 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 					<set-payload value="#[payload.path.split('${inputFolder}'+'\\\\')[1]]" doc:name="Filename"/>
 					<logger message="#[payload]" level="INFO" doc:name="Logger"/>
 					<expression-component doc:name="Decompress"><![CDATA[org.mule.util.FileUtils.unzip(new File('${inputPath}'+payload), new File('${destPath}'));
-org.mule.util.FileUtils.copyFile(new File('${inputPath}'+payload),new File('${bkpPath}'+payload));
+org.mule.util.FileUtils.unzip(new File('${inputPath}'+payload), new File('${bkpPath}'));
+//org.mule.util.FileUtils.copyFile(new File('${inputPath}'+payload),new File('${bkpPath}'+payload));
 new File('${inputPath}'+payload).delete();
 
 ]]></expression-component>
