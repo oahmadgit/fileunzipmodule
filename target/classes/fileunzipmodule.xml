@@ -13,17 +13,29 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 	
 	<flow name="mule-demosFlow">
 		<poll doc:name="Poll">
-			<set-payload value="#[org.mule.util.FileUtils.listFiles(new java.io.File('${inputPath}'),null,false)]" doc:name="Get list of files in input dir"/>
+			<fixed-frequency-scheduler frequency="1000"/>
+			<set-payload value="#[org.mule.util.FileUtils.listFiles(new java.io.File('${inputPath}'),{&quot;zip&quot;},false)]" doc:name="Get list of files in input dir"/>
 		</poll>
 		<logger message="#[payload]" level="INFO" doc:name="Logger"/>
 		<set-variable variableName="fileList" value="#[payload]" doc:name="FileList"/>
+		<set-variable variableName="uniqueAppend" value="#[message.id]" doc:name="Variable"/>
 		<choice doc:name="Choice">
 			<when expression="#[payload.size() &gt; 0]">
 				<foreach collection="fileList" doc:name="For Each">
 					<set-payload value="#[payload.path.split('${inputFolder}'+'\\\\')[1]]" doc:name="Filename"/>
 					<logger message="#[payload]" level="INFO" doc:name="Logger"/>
-					<expression-component doc:name="Decompress"><![CDATA[org.mule.util.FileUtils.unzip(new File('${inputPath}'+payload), new File('${destPath}'));
-org.mule.util.FileUtils.unzip(new File('${inputPath}'+payload), new File('${bkpPath}'));
+					<expression-component doc:name="Decompress"><![CDATA[var input = '${inputPath}'+payload;
+var id = flowVars.uniqueAppend;
+//extracting zip contents
+org.mule.util.FileUtils.unzip(new File(input), new File('${destPath}'));
+org.mule.util.FileUtils.unzip(new File(input), new File('${bkpPath}'));
+//extract orignial filename
+var orig = org.apache.commons.lang3.StringUtils.substringBeforeLast(payload,'.');
+var txt = orig+'.txt';
+//appending unqiue id
+org.mule.util.FileUtils.renameFile(new File('${destPath}'+txt),new File('${destPath}'+id+'-'+txt));
+org.mule.util.FileUtils.renameFile(new File('${bkpPath}'+txt),new File('${bkpPath}'+id+'-'+txt));
+//delete orginal file
 new File('${inputPath}'+payload).delete();
 
 ]]></expression-component>
