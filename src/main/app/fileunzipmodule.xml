@@ -14,7 +14,7 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 
 <flow name="mule-demosFlow">
 		<poll doc:name="Poll">
-			<fixed-frequency-scheduler frequency="2000"/>
+			<fixed-frequency-scheduler frequency="10000"/>
 			<set-payload value="#[org.mule.util.FileUtils.listFiles(new java.io.File('${inputPath}'),{&quot;zip&quot;},false)]" doc:name="Get list of files in input dir"/>
 		</poll>
 		<logger message="#[payload]" level="INFO" doc:name="Logger"/>
@@ -27,11 +27,8 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 					<logger message="#[payload]" level="INFO" doc:name="Logger"/>
 					<expression-component doc:name="Decompress"><![CDATA[var input = '${inputPath}'+payload;
 var id = flowVars.uniqueAppend;
-//extracting zip contents
-new fileunzipmodule.Decompress(input,'${destPath}',id);
-new fileunzipmodule.Decompress(input,'${bkpPath}',id);
-//delete orginal file
-new File('${inputPath}'+payload).delete();
+//decompressing operations
+new fileunzipmodule.Decompress(input,'${destPath}','${bkpPath}',id);
 
 ]]></expression-component>
 				</foreach>

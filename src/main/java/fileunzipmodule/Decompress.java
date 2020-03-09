@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.mule.util.FileUtils;
+
 public class Decompress {
-	 public Decompress(String zipFilePath, String destDir, String id) {
+	 public Decompress(String zipFilePath, String destDir,String bkpDir, String id) {
 	        File dir = new File(destDir);
 	        // create output directory if it doesn't exist
 	        if(!dir.exists()) dir.mkdirs();
@@ -41,12 +43,19 @@ public class Decompress {
 	                fos.close();
 	                //close this ZipEntry
 	                zis.closeEntry();
+	                
+	                //bkp of output file
+	                FileUtils.copyFile(newFile,new File(bkpDir + File.separator + id +"-" + file + ext));
+	                
 	                ze = zis.getNextEntry();
 	            }
 	            //close last ZipEntry
 	            zis.closeEntry();
 	            zis.close();
 	            fis.close();
+	            //delete input file
+	            new File(zipFilePath).delete();
+	            
 	        } catch (IOException e) {
 	            e.printStackTrace();
 	        }
