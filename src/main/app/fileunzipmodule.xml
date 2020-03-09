@@ -8,13 +8,9 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
 http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
 http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
-	
-	
-	
-
-<flow name="mule-demosFlow">
+	<flow name="mule-demosFlow2">
 		<poll doc:name="Poll">
-			<fixed-frequency-scheduler frequency="10000"/>
+			<fixed-frequency-scheduler frequency="1000"/>
 			<set-payload value="#[org.mule.util.FileUtils.listFiles(new java.io.File('${inputPath}'),{&quot;zip&quot;},false)]" doc:name="Get list of files in input dir"/>
 		</poll>
 		<logger message="#[payload]" level="INFO" doc:name="Logger"/>
@@ -27,8 +23,17 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 					<logger message="#[payload]" level="INFO" doc:name="Logger"/>
 					<expression-component doc:name="Decompress"><![CDATA[var input = '${inputPath}'+payload;
 var id = flowVars.uniqueAppend;
-//decompressing operations
-new fileunzipmodule.Decompress(input,'${destPath}','${bkpPath}',id);
+//extracting zip contents
+org.mule.util.FileUtils.unzip(new File(input), new File('${destPath}'));
+org.mule.util.FileUtils.unzip(new File(input), new File('${bkpPath}'));
+//extract orignial filename
+var orig = org.apache.commons.lang3.StringUtils.substringBeforeLast(payload,'.');
+var txt = orig+'.txt';
+//appending unqiue id
+org.mule.util.FileUtils.renameFile(new File('${destPath}'+txt),new File('${destPath}'+id+'-'+txt));
+org.mule.util.FileUtils.renameFile(new File('${bkpPath}'+txt),new File('${bkpPath}'+id+'-'+txt));
+//delete orginal file
+new File('${inputPath}'+payload).delete();
 
 ]]></expression-component>
 				</foreach>
