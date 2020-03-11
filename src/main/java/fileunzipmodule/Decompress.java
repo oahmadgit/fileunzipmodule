@@ -45,16 +45,18 @@ public class Decompress {
 	                zis.closeEntry();
 	                
 	                //bkp of output file
-	                FileUtils.copyFile(newFile,new File(bkpDir + File.separator + id +"-" + file + ext));
-	                
+	                FileUtils.copyFile(new File(zipFilePath),new File(bkpDir + File.separator + id +"-" + file + ".zip"));
+	                System.out.println("Backing up to: "+bkpDir + File.separator + id +"-" + file + ".zip");
 	                ze = zis.getNextEntry();
 	            }
 	            //close last ZipEntry
 	            zis.closeEntry();
 	            zis.close();
 	            fis.close();
+	            
 	            //delete input file
 	            new File(zipFilePath).delete();
+	            System.out.println("Input file DELETED");
 	            
 	        } catch (IOException e) {
 	            e.printStackTrace();
